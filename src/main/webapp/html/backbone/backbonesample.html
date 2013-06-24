@@ -1,0 +1,41 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="../../js/jquery/jquery-1.8.2.min.js"></script>
+        <script src="../../js/underscore/underscore-1.4.2-min.js"></script>
+        <script src="../../js/backbone/backbone-0.9.2-min.js"></script>
+        <script src="../../js/highcharts/highcharts.js"></script>
+
+        <script>
+            (function ($) {
+                Man = Backbone.Model.extend({
+                    initialize: function(){
+                        alert('Hey, you create me!');
+                        //初始化时绑定监听
+                        this.bind("change:name",function(){
+                            var name = this.get("name");
+                            alert("你改变了name属性为：" + name);
+                        });
+                    },
+                    defaults: {
+                        name:'张三',
+                        age: '38'
+                    },
+                    aboutMe: function(){
+                        return '我叫' + this.get('name') + ',今年' + this.get('age') + '岁';
+                    }
+                });
+                var man = new Man;
+                man.set({name:'the5fire'}) 
+            })(jQuery);
+        </script>
+    </head>
+    <body>
+    </body>
+</html>

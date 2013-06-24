@@ -1,0 +1,180 @@
+<html>
+    <head>
+        <title>Test performance for websocket with text message handshake</title>
+        <style type="text/css">
+            #connect-container {
+                float: left;
+                width: 400px
+            }
+
+            #connect-container div {
+                padding: 5px;
+            }
+
+            #console-container {
+                float: left;
+                margin-left: 15px;
+                width: 400px;
+            }
+
+            #console {
+                border: 1px solid #CCCCCC;
+                border-right-color: #999999;
+                border-bottom-color: #999999;
+                height: 170px;
+                overflow-y: scroll;
+                padding: 5px;
+                width: 100%;
+            }
+
+            #console p {
+                padding: 0;
+                margin: 0;
+            }
+        </style>
+        <script type="text/javascript">
+            var result = "";
+            var totalTimesSendBack = 0;
+            var totalTimes = 0;
+            var tempTimeStart = null;
+            var tempTimeStop = null;
+            var totalCostTime = 0;
+
+            var ws = null;
+
+            function setConnected(connected) {
+                document.getElementById('connect').disabled = connected;
+                document.getElementById('disconnect').disabled = !connected;
+                document.getElementById('startPerform').disabled = !connected;
+                document.getElementById('showResult').disabled = !connected;
+            }
+
+            function connect() {
+                var target = document.getElementById('target').value;
+                if (target == '') {
+                    alert('Please select server side connection implementation.');
+                    return;
+                }
+                if ('WebSocket' in window) {
+                    ws = new WebSocket(target);
+                } else if ('MozWebSocket' in window) {
+                    ws = new MozWebSocket(target);
+                } else {
+                    alert('WebSocket is not supported by this browser.');
+                    return;
+                }
+                ws.onopen = function () {
+                    setConnected(true);
+                };
+                ws.onmessage = function (event) {
+                    result = result + event.data;
+                    totalTimesSendBack++;
+                    if(totalTimesSendBack>=totalTimes){
+                        tempTimeStop = getCurrentTimeInMillis();
+                        totalCostTime = tempTimeStop - tempTimeStart;
+                    }
+                };
+                ws.onclose = function () {
+                    setConnected(false);
+                };
+            }
+
+            function disconnect() {
+                if (ws != null) {
+                    ws.close();
+                    ws = null;
+                }
+                setConnected(false);
+            }
+
+
+            function updateTarget(target) {
+                if (window.location.protocol == 'http:') {
+                    document.getElementById('target').value = 'ws://' + window.location.host + target;
+                } else {
+                    document.getElementById('target').value = 'wss://' + window.location.host + target;
+                }
+            }
+
+            function log(message) {
+                var console = document.getElementById('console');
+                var p = document.createElement('p');
+                p.style.wordWrap = 'break-word';
+                p.appendChild(document.createTextNode(message));
+                console.appendChild(p);
+                while (console.childNodes.length > 25) {
+                    console.removeChild(console.firstChild);
+                }
+                console.scrollTop = console.scrollHeight;
+            }
+            
+            function clearConsole(){
+                document.getElementById('console').innerHTML="";
+            }
+        
+            function sendMessage(times){
+                totalTimes = times;
+                totalTimesSendBack = 0;
+                clearConsole();
+                if(times<=0){
+                    return;
+                }
+                tempTimeStart = getCurrentTimeInMillis();
+                for(i=0;i<totalTimes;i++){
+                    ws.send("message"+i);
+                }
+            }
+            
+            function startTesting(){
+                var count = document.getElementById('messageCount').value;
+                sendMessage(count);
+            }
+            
+            function showTestResult(){
+                log("send "+totalTimesSendBack+" messages cost "+totalCostTime+" ms!");
+                log("all message concat result is: "+result);
+            }
+            
+            function getCurrentTimeInMillis(){
+                var t = new Date();
+                var d = Date.UTC(t.getYear(), t.getMonth(), t.getDate(), t.getHours(), t.getMinutes(), t.getSeconds(), t.getMilliseconds());
+                return d;
+            }
+        </script>
+    </head>
+    <body>
+        <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websockets rely on Javascript being enabled. Please enable
+            Javascript and reload this page!</h2></noscript>
+        <div>
+            <div id="connect-container">
+                <div>
+                    <span>Connect using:</span>
+                    <!-- echo example using streams on the server side -->
+                    <input id="radio1" type="radio" name="group1" value="/tomcatwebsock/examples/echoStream"
+                           onclick="updateTarget(this.value);"> <label for="radio1">streams</label>
+                    <!-- echo example using messages on the server side -->
+                    <input id="radio2" type="radio" name="group1" value="/tomcatwebsock/examples/echoMessage"
+                           onclick="updateTarget(this.value);"> <label for="radio2">messages</label>
+                </div>
+                <div>
+                    <input id="target" type="text" size="40" style="width: 350px"/>
+                </div>
+                <div>
+                    <button id="connect" onclick="connect();">Connect</button>
+                    <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+                </div>
+                <div>
+                    <span>Input how many messages you want to send:</span>
+                    <input id="messageCount" type="text" size="10" />
+                </div>
+                <div>
+                    <button id="startPerform" disabled="disabled" onclick="startTesting()">Performance test</button>
+                    <button id="showResult" disabled="disabled" onclick="showTestResult()">Show Testing Result</button>
+                </div>
+            </div>
+            <div id="console-container">
+                <div id="console"></div>
+            </div>
+        </div>
+    </body>
+</html>

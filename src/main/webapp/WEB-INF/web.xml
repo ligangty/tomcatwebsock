@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+                      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0"
+         metadata-complete="true">
+
+    <display-name>Sample WebSocket app with Tomcat 7.0</display-name>
+    <description>
+        Welcome to Sample WebSocket app with Tomcat 7.0
+    </description>
+  
+  
+
+    <!-- Tomcat WebSocket Examples -->
+    <servlet>
+        <servlet-name>wsEchoStream</servlet-name>
+        <servlet-class>tomcat.examples.websocket.echo.EchoStream</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wsEchoStream</servlet-name>
+        <url-pattern>/examples/echoStream</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>wsEchoMessage</servlet-name>
+        <servlet-class>tomcat.examples.websocket.echo.EchoMessage</servlet-class>
+        <!-- Uncomment the following block to increase the default maximum
+        WebSocket buffer size from 2MB to 20MB which is required for the
+        Autobahn test suite to pass fully. -->
+        <!--
+        <init-param>
+          <param-name>byteBufferMaxSize</param-name>
+          <param-value>20971520</param-value>
+        </init-param>
+        <init-param>
+          <param-name>charBufferMaxSize</param-name>
+          <param-value>20971520</param-value>
+        </init-param>
+        -->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wsEchoMessage</servlet-name>
+        <url-pattern>/examples/echoMessage</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>wsChat</servlet-name>
+        <servlet-class>tomcat.examples.websocket.chat.ChatWebSocketServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wsChat</servlet-name>
+        <url-pattern>/examples/chat</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>wsSnake</servlet-name>
+        <servlet-class>tomcat.examples.websocket.snake.SnakeWebSocketServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wsSnake</servlet-name>
+        <url-pattern>/examples/snake</url-pattern>
+    </servlet-mapping>
+    <!-- Tomcat WebSocket Examples -->
+    
+    <!-- Charting comet sample -->
+    <servlet>
+        <servlet-name>wsChartResponseWebSockServlet</servlet-name>
+        <servlet-class>gang.li.websock.server.sample.ChartResponseWebSockServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>wsChartResponseWebSockServlet</servlet-name>
+        <url-pattern>/ChartResponse</url-pattern>
+    </servlet-mapping>
+    <!-- Charting comet sample -->
+    
+    <!--resteasy rs implementation-->
+    <listener>
+        <listener-class>
+            org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap
+        </listener-class>
+    </listener>
+    <servlet>
+        <servlet-name>Resteasy</servlet-name>
+        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Resteasy</servlet-name>
+        <url-pattern>/restful-services/*</url-pattern>
+    </servlet-mapping>
+    <context-param>
+        <param-name>resteasy.scan</param-name>
+        <param-value>true</param-value>    
+    </context-param>
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/restful-services</param-value>
+    </context-param>
+    <!--resteasy rs implementation-->
+
+
+</web-app>

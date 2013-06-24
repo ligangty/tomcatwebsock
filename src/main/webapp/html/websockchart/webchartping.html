@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="../../js/jquery/jquery-1.8.2.min.js"></script>
+        <script>
+            var Chat = {};
+            (function ($) {
+
+                Chat.socket = null;
+
+                Chat.connect = (function(host) {
+                    if ('WebSocket' in window) {
+                        Chat.socket = new WebSocket(host);
+                    } else if ('MozWebSocket' in window) {
+                        Chat.socket = new MozWebSocket(host);
+                    } else {
+                        Console.log('Error: WebSocket is not supported by this browser.');
+                        return;
+                    }
+                    
+                });
+
+                Chat.initialize = function() {
+                    if (window.location.protocol == 'http:') {
+                        Chat.connect('ws://' + window.location.host + '/tomcatwebsock/ChartResponse');
+                    } else {
+                        Chat.connect('wss://' + window.location.host + '/tomcatwebsock/ChartResponse');
+                    }
+                };
+                
+                Chat.sendMessage = function() {
+                    var message = $('#messageSending').val();
+                    if (message != '') {
+                        Chat.socket.send(message);
+                    }
+                };
+
+                Chat.initialize();
+                
+            })(jQuery);
+        </script>
+    </head>
+    <body>
+        <div><span>add a series number to render the chart:</span><input type="text" id="messageSending" /></div>
+        <div><input type="button" id="sendMessage" value="send data" onclick="Chat.sendMessage()"/></div>
+    </body>
+</html>

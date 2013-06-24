@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="../../js/jquery/jquery-1.8.2.min.js"></script>
+        <script src="../../js/highcharts/highcharts.js"></script>
+    </head>
+    <body>
+        <div id="console"></div>
+        <div id="container"></div>
+    </body>
+    <script>
+            (function ($) {
+                var charRenderer = {
+                    renderChart : function(options) {
+                        $('#container').html("");
+                        _options = {
+                            chart : {
+                                renderTo : 'container',
+                                ignoreHiddenSeries: false
+                            },
+
+                            title : {
+                                text : options.title
+                            },
+
+                            yAxis : {
+                                min : 0,
+                                title : {
+                                    text : 'count'
+                                },
+                                labels : {
+                                    formatter : function() {
+                                        return this.value + ' ';
+                                    }
+                                }
+                            } ,
+
+                            tooltip : {
+                                formatter : function() {
+                                    if (this.type == 'line') {
+                                        return null;
+                                    } else {
+                                        return '<b>' + this.x + '</b><br/>'
+                                            + this.series.name + ': ' + this.y;
+                                    }
+                                }
+                            },
+
+                            credits : {
+                                enabled : true,
+                                href : "http://www.redhat.com",
+                                text : "Source From:Red Hat",
+                                target : "_blank"
+                            },
+
+                            series : options.series
+                        };
+                        if(options.xAxis){
+                            $.extend(_options, {xAxis :{
+                                    categories : options.xAxis,
+                                    labels : {
+                                        formatter : function() {
+                                            return this.value.substring(5);
+                                        }
+                                    }
+                                }});
+                        }
+
+                        var chart = new Highcharts.Chart(_options);
+                        chart.setSize($('#'+options.renderTo).width(), $('#'+options.renderTo).height(), true);
+                    }
+                };
+                
+                var Chat = {};
+
+                Chat.socket = null;
+
+                Chat.connect = (function(host) {
+                    if ('WebSocket' in window) {
+                        Chat.socket = new WebSocket(host);
+                    } else if ('MozWebSocket' in window) {
+                        Chat.socket = new MozWebSocket(host);
+                    } else {
+                        Console.log('Error: WebSocket is not supported by this browser.');
+                        return;
+                    }
+
+                    Chat.socket.onmessage = function (message) {
+                        
+                        var targetMessage = $.parseJSON(message.data);
+                        if(targetMessage.pingMessage){
+                            Console.log(targetMessage.pingMessage);
+                        }else{
+                            //                            Console.log(message.data);
+                            var chartOptions = {};
+                            $.extend(chartOptions,{renderTo:'container',title:'test chart'});
+                            $.extend(chartOptions,targetMessage);
+                
+                            charRenderer.renderChart(chartOptions);
+                        }
+                    };
+                });
+
+                Chat.initialize = function() {
+                    if (window.location.protocol == 'http:') {
+                        Chat.connect('ws://' + window.location.host + '/tomcatwebsock/ChartResponse');
+                    } else {
+                        Chat.connect('wss://' + window.location.host + '/tomcatwebsock/ChartResponse');
+                    }
+                };
+
+                var Console = {};
+
+                Console.log = (function(message) {
+                    $('#console').html("").html("<span>"+message+"</span>");
+                });
+
+                Chat.initialize();
+            })(jQuery);
+        </script>
+</html>
